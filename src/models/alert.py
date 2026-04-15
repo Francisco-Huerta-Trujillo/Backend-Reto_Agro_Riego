@@ -1,15 +1,14 @@
 # app/models/alert.py
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, BigInteger, String, Text, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime
+from sqlalchemy.sql import func
 from app.database.base import Base
 
 class Alerta(Base):
     __tablename__ = "alertas"
-    id = Column(Integer, primary_key=True, index=True)
-    area_id = Column(UUID(as_uuid=True), ForeignKey("areas_riego.id"))
-    medicion_id = Column(Integer, ForeignKey("mediciones.id"))
-    tipo_alerta = Column(String)
-    mensaje = Column(String)
-    fecha_generacion = Column(DateTime, default=datetime.utcnow)
-    vista = Column(Boolean, default=False)
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_areariego = Column(UUID(as_uuid=True), ForeignKey("areas_riego.id_areariego", ondelete="CASCADE"))
+    tipo_de_alerta = Column(String(100), nullable=False)
+    mensaje_de_alerta = Column(Text, nullable=False)
+    fecha = Column(DateTime(timezone=True), server_default=func.now())

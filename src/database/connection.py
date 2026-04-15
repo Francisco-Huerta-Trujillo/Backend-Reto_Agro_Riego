@@ -1,9 +1,12 @@
 # app/database/connection.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.core.config import DATABASE_URL # Asegúrate de tener tu URL en config.py
+import os
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Cambia esto por tu URL real (ej: postgresql://user:pass@localhost/agroriego)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/agroriego")
+
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db():
