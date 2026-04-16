@@ -5,6 +5,7 @@ from uuid import UUID
 # Importamos el modelo y los schemas
 from src.models.predio import Predio
 from src.schemas.predio_schema import PredioCreate, PredioUpdate
+from src.models.predio import tabla_usuarios_predios
 
 class PredioService:
 
