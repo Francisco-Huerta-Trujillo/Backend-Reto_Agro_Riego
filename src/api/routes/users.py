@@ -1,35 +1,45 @@
-from fastapi import APIRouter
-from services.user_service import (
-    login,
-    get_users,
-    get_user,
-    create_user,
-    delete_user,
-    get_user_areas
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+from uuid import UUID
+
+from src.database.connection import get_db
+from src.schemas.user_schema import UserCreate, UserResponse
+from src.services.user_service import (
+    login, get_users, get_user, create_user, delete_user, get_user_areas
 )
+# Nota: get_user_areas devolverá schemas de Area
+from src.schemas.area_schema import AreaResponse
 
 router = APIRouter()
 
+# El login usualmente usa OAuth2PasswordRequestForm, lo dejamos genérico por ahora
 @router.post("/login")
-def login_user(user):
-    return login(user)
+async def login_user(credenciales: dict, db: AsyncSession = Depends(get_db)):
+    return await login(db, credenciales)
 
-@router.get("/")
-def read_users():
-    return get_users()
+@router.get("/", response_model=List[UserResponse])
+async def read_users(db: AsyncSession = Depends(get_db)):
+    return await get_users(db)
 
-@router.get("/{user_id}")
-def read_user(user_id: int):
-    return get_user(user_id)
+@router.get("/{user_id}", response_model=UserResponse)
+async def read_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    user = await get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user
 
-@router.post("/")
-def create_user_endpoint(user):
-    return create_user(user)
+@router.post("/", response_model=UserResponse)
+async def create_user_endpoint(user: UserCreate, db: AsyncSession = Depends(get_db)):
+    return await create_user(db, user)
 
 @router.delete("/{user_id}")
-def delete_user_endpoint(user_id: int):
-    return delete_user(user_id)
+async def delete_user_endpoint(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    exito = await delete_user(db, user_id)
+    if not exito:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"mensaje": "Usuario eliminado exitosamente"}
 
-@router.get("/{user_id}/areas")
-def read_user_areas(user_id: int):
-    return get_user_areas(user_id)
+@router.get("/{user_id}/areas", response_model=List[AreaResponse])
+async def read_user_areas(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await get_user_areas(db, user_id)
