@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from src.database.base import Base
 
-class HistorialCambio(Base):
+class HistorialCambios(Base):
     __tablename__ = "historial_cambios"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
