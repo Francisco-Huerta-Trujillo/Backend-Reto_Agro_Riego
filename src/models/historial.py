@@ -2,7 +2,7 @@
 from sqlalchemy import Column, BigInteger, Text, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from app.database.base import Base
+from src.database.base import Base
 
 class HistorialCambio(Base):
     __tablename__ = "historial_cambios"
