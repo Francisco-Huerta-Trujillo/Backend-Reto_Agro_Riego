@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from uuid import UUID
+from pydantic import BaseModel
 
 # 1. Base: Los atributos que comparten casi todos los schemas de usuario
 class UserBase(BaseModel):
@@ -29,3 +30,7 @@ class UserResponse(UserBase):
 
     # Esto es CRÍTICO: Le dice a Pydantic que entienda los objetos de la base de datos (SQLAlchemy)
     model_config = ConfigDict(from_attributes=True)
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
