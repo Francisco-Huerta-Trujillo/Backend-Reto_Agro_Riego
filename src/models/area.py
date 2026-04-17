@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, ForeignKey, Table, Numeric
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
-from app.database.base import Base
+from src.database.base import Base
 
 # Tabla intermedia para Relación M:N entre Usuarios y Predios
 usuarios_predios = Table(

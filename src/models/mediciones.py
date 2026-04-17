@@ -2,7 +2,7 @@
 from sqlalchemy import Column, BigInteger, Float, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from app.database.base import Base
+from src.database.base import Base
 
 class Medicion(Base):
     __tablename__ = "mediciones"
