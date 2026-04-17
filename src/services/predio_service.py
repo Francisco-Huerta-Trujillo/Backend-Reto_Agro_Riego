@@ -2,7 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, delete
 from uuid import UUID
 
-from src.models.predio import Predio, tabla_usuarios_predios
+from src.models.predio import Predio
+from src.models.associations import usuarios_predios
 from src.schemas.predio_schema import PredioCreate, PredioUpdate
 
 async def get_predios(db: AsyncSession) -> list[Predio]:
@@ -44,7 +45,7 @@ async def get_predio_areas(db: AsyncSession, predio_id: UUID):
     return list(result.scalars().all())
 
 async def asignar_usuario(db: AsyncSession, id_predio: UUID, id_usuario: UUID) -> bool:
-    stmt = insert(tabla_usuarios_predios).values(id_usuario=id_usuario, id_predio=id_predio)
+    stmt = insert(usuarios_predios).values(id_usuario=id_usuario, id_predio=id_predio)
     try:
         await db.execute(stmt)
         await db.commit()
@@ -55,9 +56,9 @@ async def asignar_usuario(db: AsyncSession, id_predio: UUID, id_usuario: UUID) -
         return False
 
 async def remover_usuario(db: AsyncSession, id_predio: UUID, id_usuario: UUID) -> bool:
-    stmt = delete(tabla_usuarios_predios).where(
-        tabla_usuarios_predios.c.id_usuario == id_usuario,
-        tabla_usuarios_predios.c.id_predio == id_predio
+    stmt = delete(usuarios_predios).where(
+        usuarios_predios.c.id_usuario == id_usuario,
+        usuarios_predios.c.id_predio == id_predio
     )
     await db.execute(stmt)
     await db.commit()

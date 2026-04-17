@@ -4,14 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
 from src.database.base import Base
-
-# Tabla intermedia para Relación M:N: usuarios_predios
-usuarios_predios = Table(
-    "usuarios_predios",
-    Base.metadata,
-    Column("id_usuario", UUID(as_uuid=True), ForeignKey("usuarios.id_usuario", ondelete="CASCADE"), primary_key=True),
-    Column("id_predio", UUID(as_uuid=True), ForeignKey("predios.id_predio", ondelete="CASCADE"), primary_key=True),
-)
+from src.models.associations import usuarios_predios
 
 class Predio(Base):
     __tablename__ = "predios"
@@ -23,10 +16,3 @@ class Predio(Base):
     # Relaciones (Opcionales para facilitar consultas)
     usuarios = relationship("Usuario", secondary=usuarios_predios, backref="mis_predios")
 
-tabla_usuarios_predios = Table(
-    'usuarios_predios',
-    Base.metadata,
-    # El tipo de dato (UUID o String) debe coincidir con el que usaste en las llaves primarias
-    Column('id_usuario', ForeignKey('usuarios.id_usuario', ondelete="CASCADE"), primary_key=True),
-    Column('id_predio', ForeignKey('predios.id_predio', ondelete="CASCADE"), primary_key=True)
-)
