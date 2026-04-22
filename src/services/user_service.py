@@ -6,7 +6,8 @@ from fastapi import HTTPException
 from src.models.user import Usuario 
 from src.schemas.user_schema import UserCreate
 from src.models.area import AreaRiego
-from src.models.predio import Predio, tabla_usuarios_predios
+from src.models.predio import Predio
+from src.models.associations import usuarios_predios
 from src.core.security import create_access_token, hash_password, verify_password
 
 async def get_users(db: AsyncSession) -> list[Usuario]:
@@ -37,8 +38,8 @@ async def get_user_areas(db: AsyncSession, user_id: UUID) -> list[AreaRiego]:
     stmt = (
         select(AreaRiego)
         .join(Predio, AreaRiego.id_predio == Predio.id_predio)
-        .join(tabla_usuarios_predios, Predio.id_predio == tabla_usuarios_predios.c.id_predio)
-        .where(tabla_usuarios_predios.c.id_usuario == user_id)
+        .join(usuarios_predios, Predio.id_predio == usuarios_predios.c.id_predio)
+        .where(usuarios_predios.c.id_usuario == user_id)
     )
     result = await db.execute(stmt)
     return list(result.scalars().all())
