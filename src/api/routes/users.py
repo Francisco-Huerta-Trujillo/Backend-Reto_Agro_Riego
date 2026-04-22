@@ -4,22 +4,24 @@ from typing import List
 from uuid import UUID
 
 from src.database.connection import get_db
-from src.schemas.user_schema import UserCreate, UserResponse
+from src.schemas.user_schema import UserCreate, UserResponse, UserLogin
 from src.services.user_service import (
     login, get_users, get_user, create_user, delete_user, get_user_areas
 )
-# Nota: get_user_areas devolverá schemas de Area
 from src.schemas.area_schema import AreaResponse
+from src.core.security import get_current_user
 
 router = APIRouter()
 
-# El login usualmente usa OAuth2PasswordRequestForm, lo dejamos genérico por ahora
 @router.post("/login")
-async def login_user(credenciales: dict, db: AsyncSession = Depends(get_db)):
+async def login_user(credenciales: UserLogin, db: AsyncSession = Depends(get_db)):
     return await login(db, credenciales)
 
 @router.get("/", response_model=List[UserResponse])
-async def read_users(db: AsyncSession = Depends(get_db)):
+async def read_users(
+    db: AsyncSession = Depends(get_db),
+    user = Depends(get_current_user)
+):
     return await get_users(db)
 
 @router.get("/{user_id}", response_model=UserResponse)
