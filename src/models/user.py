@@ -9,6 +9,7 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id_usuario = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), nullable=False, unique=True, index=True)
     nombre = Column(String(100), nullable=False)
     apellido_p = Column(String(100), nullable=False)
     apellido_m = Column(String(100))

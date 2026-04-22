@@ -1,10 +1,10 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel
 
 # 1. Base: Los atributos que comparten casi todos los schemas de usuario
 class UserBase(BaseModel):
+    email: str
     nombre: str
     apellido_p: str
     apellido_m: Optional[str] = None
@@ -17,6 +17,7 @@ class UserCreate(UserBase):
 
 # 3. Update: Lo que React nos envía para ACTUALIZAR (todo es opcional)
 class UserUpdate(BaseModel):
+    email: Optional[str] = None
     nombre: Optional[str] = None
     apellido_p: Optional[str] = None
     apellido_m: Optional[str] = None
@@ -33,4 +34,17 @@ class UserResponse(UserBase):
 
 class UserLogin(BaseModel):
     email: str
-    password: str
+    password: Optional[str] = None
+    contrasena: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_password_fields(self):
+        if not self.password and not self.contrasena:
+            raise ValueError("Se requiere password o contrasena")
+
+        if not self.password and self.contrasena:
+            self.password = self.contrasena
+
+        return self
+
+        

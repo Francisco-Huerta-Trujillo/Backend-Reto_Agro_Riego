@@ -7,7 +7,7 @@ from src.models.user import Usuario
 from src.schemas.user_schema import UserCreate
 from src.models.area import AreaRiego
 from src.models.predio import Predio, tabla_usuarios_predios
-from src.core.security import create_access_token
+from src.core.security import create_access_token, hash_password, verify_password
 
 async def get_users(db: AsyncSession) -> list[Usuario]:
     result = await db.execute(select(Usuario))
@@ -18,7 +18,9 @@ async def get_user(db: AsyncSession, user_id: UUID) -> Usuario | None:
     return result.scalars().first()
 
 async def create_user(db: AsyncSession, user_in: UserCreate) -> Usuario:
-    db_user = Usuario(**user_in.model_dump()) 
+    user_data = user_in.model_dump()
+    user_data["contrasena"] = hash_password(user_data["contrasena"])
+    db_user = Usuario(**user_data)
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
@@ -42,12 +44,15 @@ async def get_user_areas(db: AsyncSession, user_id: UUID) -> list[AreaRiego]:
     return list(result.scalars().all())
 
 async def login(db: AsyncSession, credenciales):
+    credenciales_data = credenciales.model_dump() if hasattr(credenciales, "model_dump") else credenciales
+
     result = await db.execute(
-        select(Usuario).where(Usuario.email == credenciales["email"])
+        select(Usuario).where(Usuario.email == credenciales_data["email"])
     )
     user = result.scalars().first()
 
-    if not user or user.password != credenciales["password"]:
+    plain_password = credenciales_data.get("password") or credenciales_data.get("contrasena")
+    if not user or not plain_password or not verify_password(plain_password, user.contrasena):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
     token = create_access_token({"sub": str(user.id_usuario)})
