@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
@@ -14,7 +15,7 @@ from src.core.security import get_current_user
 router = APIRouter()
 
 @router.post("/login")
-async def login_user(credenciales: UserLogin, db: AsyncSession = Depends(get_db)):
+async def login_user(credenciales: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     return await login(db, credenciales)
 
 @router.get("/", response_model=List[UserResponse])

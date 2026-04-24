@@ -26,3 +26,17 @@ class PredioResponse(PredioBase):
 class UsuarioPredioAsignacion(BaseModel):
     id_usuario: UUID
     id_predio: UUID
+
+class DashboardStatsResponse(BaseModel):
+    soil_humidity: str
+    ambient_temp: str
+    evapotranspiration: str
+    water_consumption: str
+
+class ChartHumedadResponse(BaseModel):
+    time: str
+    value: float
+
+class ChartConsumoResponse(BaseModel):
+    day: str
+    value: float

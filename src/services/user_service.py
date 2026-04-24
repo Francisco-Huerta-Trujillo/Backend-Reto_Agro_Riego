@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 from src.models.user import Usuario 
 from src.schemas.user_schema import UserCreate
@@ -44,20 +45,19 @@ async def get_user_areas(db: AsyncSession, user_id: UUID) -> list[AreaRiego]:
     result = await db.execute(stmt)
     return list(result.scalars().all())
 
-async def login(db: AsyncSession, credenciales):
-    credenciales_data = credenciales.model_dump() if hasattr(credenciales, "model_dump") else credenciales
+async def login(db: AsyncSession, credenciales: OAuth2PasswordRequestForm):
+    email_ingresado = credenciales.username
+    password_ingresado = credenciales.password
 
     result = await db.execute(
-        select(Usuario).where(Usuario.email == credenciales_data["email"])
+        select(Usuario).where(Usuario.email == email_ingresado)
     )
     user = result.scalars().first()
 
-    plain_password = credenciales_data.get("password") or credenciales_data.get("contrasena")
-    if not user or not plain_password or not verify_password(plain_password, user.contrasena):
+    if not user or not verify_password(password_ingresado, user.contrasena):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
     token = create_access_token({"sub": str(user.id_usuario)})
-
     return {
         "access_token": token,
         "token_type": "bearer"

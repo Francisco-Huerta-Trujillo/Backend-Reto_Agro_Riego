@@ -4,10 +4,13 @@ from typing import List
 from uuid import UUID
 
 from src.database.connection import get_db
-from src.schemas.predio_schema import PredioCreate, PredioUpdate, PredioResponse
+from src.schemas.predio_schema import PredioCreate, PredioUpdate, PredioResponse, DashboardStatsResponse, ChartConsumoResponse, ChartHumedadResponse
 from src.schemas.area_schema import AreaResponse
+from src.schemas.alert_schema import AlertResponse
+
+from src.services.alert_service import get_predio_alerts
 from src.services.predio_service import (
-    get_predios, get_predio, create_predio, update_predio, delete_predio, get_predio_areas
+    get_predios, get_predio, create_predio, update_predio, delete_predio, get_predio_areas, get_dashboard_stats, get_chart_consumo, get_chart_humedad
 )
 
 router = APIRouter()
@@ -44,3 +47,19 @@ async def delete_predio_endpoint(predio_id: UUID, db: AsyncSession = Depends(get
 @router.get("/{predio_id}/areas", response_model=List[AreaResponse])
 async def read_predio_areas(predio_id: UUID, db: AsyncSession = Depends(get_db)):
     return await get_predio_areas(db, predio_id)
+
+@router.get("/{predio_id}/dashboard-stats", response_model=DashboardStatsResponse)
+async def read_dashboard_stats(predio_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await get_dashboard_stats(db, predio_id)
+
+@router.get("/{predio_id}/chart-humedad", response_model=List[ChartHumedadResponse])
+async def read_chart_humedad(predio_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await get_chart_humedad(db, predio_id)
+
+@router.get("/{predio_id}/chart-consumo", response_model=List[ChartConsumoResponse])
+async def read_chart_consumo(predio_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await get_chart_consumo(db, predio_id)
+
+@router.get("/{predio_id}/alerts", response_model=List[AlertResponse])
+async def read_predio_alerts(predio_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await get_predio_alerts(db, predio_id)
