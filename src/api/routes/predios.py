@@ -13,11 +13,33 @@ from src.services.predio_service import (
     get_predios, get_predio, create_predio, update_predio, delete_predio, get_predio_areas, get_dashboard_stats, get_chart_consumo, get_chart_humedad
 )
 
+from src.core.security import get_current_user
+
 router = APIRouter()
 
-@router.get("/", response_model=List[PredioResponse])
-async def read_predios(db: AsyncSession = Depends(get_db)):
-    return await get_predios(db)
+@router.get("/")
+async def read_predios(
+    db: AsyncSession = Depends(get_db), 
+    current_user = Depends(get_current_user) # Quitamos el tipo dict para evitar conflictos
+):
+    try:
+        # Intentamos sacar el ID de todas las formas posibles que usa FastAPI
+        u_id = None
+        
+        if isinstance(current_user, dict):
+            u_id = current_user.get("user_id") or current_user.get("id") or current_user.get("sub")
+        else:
+            u_id = getattr(current_user, "id_usuario", None) or getattr(current_user, "id", None)
+
+        if not u_id:
+            print("🚨 ERROR: No se encontró ID en el token. Contenido:", current_user)
+            raise HTTPException(status_code=401, detail="Token inválido")
+
+        return await get_predios(u_id, db)
+        
+    except Exception as e:
+        print(f"🔥 ERROR CRÍTICO EN PREDIOS: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{predio_id}", response_model=PredioResponse)
 async def read_predio(predio_id: UUID, db: AsyncSession = Depends(get_db)):

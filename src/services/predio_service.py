@@ -9,8 +9,16 @@ from src.schemas.predio_schema import PredioCreate, PredioUpdate
 from src.models.mediciones import Medicion
 from src.models.area import AreaRiego
 
-async def get_predios(db: AsyncSession) -> list[Predio]:
-    result = await db.execute(select(Predio))
+async def get_predios(usuario_id: str, db: AsyncSession) -> list[Predio]:
+    # Construimos la consulta cruzando la tabla de Predios con la tabla intermedia
+    stmt = (
+        select(Predio)
+        .join(usuarios_predios, Predio.id_predio == usuarios_predios.c.id_predio)
+        .where(usuarios_predios.c.id_usuario == usuario_id)
+    )
+    
+    # Ejecutamos la consulta de forma asíncrona
+    result = await db.execute(stmt)
     return list(result.scalars().all())
 
 async def get_predio(db: AsyncSession, predio_id: UUID) -> Predio | None:
