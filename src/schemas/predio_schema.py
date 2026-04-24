@@ -1,12 +1,33 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from pydantic import BaseModel, ConfigDict, model_validator
+from typing import Optional, List # Importamos List
 from uuid import UUID
+# IMPORTANTE: Importas el esquema del otro archivo
+from src.schemas.area_schema import AreaResponse 
 
-# 1. Base: Atributos comunes
 class PredioBase(BaseModel):
     coordenadas: Optional[str] = None
-    id_encargado: Optional[UUID] = None  # Llave foránea hacia el usuario
+    id_encargado: Optional[UUID] = None
 
+class PredioResponse(PredioBase):
+    id_predio: UUID
+    lat: float = 0.0
+    lng: float = 0.0
+    # Aquí usas la clase que importaste arriba
+    areas: List[AreaResponse] = [] 
+
+    model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode='after')
+    def split_coordenadas(self) -> 'PredioResponse':
+        if self.coordenadas and ',' in self.coordenadas:
+            try:
+                parts = self.coordenadas.split(',')
+                self.lat = float(parts[0].strip())
+                self.lng = float(parts[1].strip())
+            except:
+                self.lat, self.lng = 0.0, 0.0
+        return self
+    
 # 2. Create: Lo que pedimos para registrar un nuevo predio
 class PredioCreate(PredioBase):
     pass # No hay campos extra obligatorios para crear, hereda todo de Base
