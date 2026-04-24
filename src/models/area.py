@@ -13,3 +13,4 @@ class AreaRiego(Base):
     tipo_cultivo = Column(String(100))
     latitud = Column(Numeric(10, 8))
     longitud = Column(Numeric(11, 8))
+    predio = relationship("Predio", back_populates="areas")

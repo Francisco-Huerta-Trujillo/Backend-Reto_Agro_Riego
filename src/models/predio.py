@@ -18,3 +18,4 @@ class Predio(Base):
 
     # Relación M:N
     usuarios = relationship("Usuario", secondary=usuarios_predios, backref="mis_predios")
+    areas = relationship("AreaRiego", back_populates="predio")

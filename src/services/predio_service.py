@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, delete, func, cast, Date
+from sqlalchemy.orm import selectinload
 from uuid import UUID
 from typing import List
 
@@ -10,14 +11,13 @@ from src.models.mediciones import Medicion
 from src.models.area import AreaRiego
 
 async def get_predios(usuario_id: str, db: AsyncSession) -> list[Predio]:
-    # Construimos la consulta cruzando la tabla de Predios con la tabla intermedia
     stmt = (
         select(Predio)
+        .options(selectinload(Predio.areas)) # 👈 ✨ ESTA ES LA MAGIA ✨
         .join(usuarios_predios, Predio.id_predio == usuarios_predios.c.id_predio)
         .where(usuarios_predios.c.id_usuario == usuario_id)
     )
     
-    # Ejecutamos la consulta de forma asíncrona
     result = await db.execute(stmt)
     return list(result.scalars().all())
 
