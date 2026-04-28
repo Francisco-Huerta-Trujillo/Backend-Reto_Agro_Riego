@@ -11,8 +11,12 @@ app = FastAPI(
 # Configuración CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173",
-                   "https://francisco-huerta-trujillo.github.io"],
+    # Asegúrate de NO poner una diagonal (/) al final de los links
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173", # Vite a veces usa esta
+        "https://francisco-huerta-trujillo.github.io"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]

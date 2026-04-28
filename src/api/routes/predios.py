@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
+from datetime import date
 
 from src.database.connection import get_db
 from src.schemas.predio_schema import PredioCreate, PredioUpdate, PredioResponse, DashboardStatsResponse, ChartConsumoResponse, ChartHumedadResponse
@@ -79,8 +80,13 @@ async def read_chart_humedad(predio_id: UUID, db: AsyncSession = Depends(get_db)
     return await get_chart_humedad(db, predio_id)
 
 @router.get("/{predio_id}/chart-consumo", response_model=List[ChartConsumoResponse])
-async def read_chart_consumo(predio_id: UUID, db: AsyncSession = Depends(get_db)):
-    return await get_chart_consumo(db, predio_id)
+async def read_chart_consumo(
+    predio_id: UUID, 
+    start_date: date = None, # Parámetro opcional en la URL
+    end_date: date = None,   # Parámetro opcional en la URL
+    db: AsyncSession = Depends(get_db)
+):
+    return await get_chart_consumo(db, predio_id, start_date, end_date)
 
 @router.get("/{predio_id}/alerts", response_model=List[AlertResponse])
 async def read_predio_alerts(predio_id: UUID, db: AsyncSession = Depends(get_db)):

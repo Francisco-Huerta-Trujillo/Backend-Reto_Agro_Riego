@@ -3,6 +3,7 @@ from sqlalchemy import select, insert, delete, func, cast, Date
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 from typing import List
+from datetime import date as python_date
 
 from src.models.predio import Predio
 from src.models.associations import usuarios_predios
@@ -128,7 +129,7 @@ async def get_chart_humedad(db: AsyncSession, predio_id: UUID) -> List[dict]:
 
     return [{"time": row[0], "value": float(f"{row[1]:.1f}")} for row in rows if row[1] is not None]
 
-async def get_chart_consumo(db: AsyncSession, predio_id: UUID) -> List[dict]:
+async def get_chart_consumo(db: AsyncSession, predio_id: UUID, start_date: python_date = None, end_date: python_date = None) -> List[dict]:
     # Expresiones seguras para agrupar por día
     dia_expr = func.to_char(Medicion.fecha, 'Dy')
     fecha_pura_expr = cast(Medicion.fecha, Date)
@@ -140,9 +141,16 @@ async def get_chart_consumo(db: AsyncSession, predio_id: UUID) -> List[dict]:
         )
         .join(AreaRiego, Medicion.id_areariego == AreaRiego.id_areariego)
         .where(AreaRiego.id_predio == predio_id)
-        .group_by(dia_expr, fecha_pura_expr)
+    )
+
+    if start_date:
+        query = query.where(cast(Medicion.fecha, Date) >= start_date)
+    if end_date:
+        query = query.where(cast(Medicion.fecha, Date) <= end_date)
+
+    query = (
+        query.group_by(dia_expr, fecha_pura_expr)
         .order_by(fecha_pura_expr)
-        .limit(7)
     )
     
     result = await db.execute(query)
