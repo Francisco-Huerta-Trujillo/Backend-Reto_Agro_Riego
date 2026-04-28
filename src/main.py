@@ -11,7 +11,6 @@ app = FastAPI(
 # Configuración CORS
 app.add_middleware(
     CORSMiddleware,
-    # Asegúrate de NO poner una diagonal (/) al final de los links
     allow_origins=[
         "http://localhost:5173", 
         "http://127.0.0.1:5173", # Vite a veces usa esta
